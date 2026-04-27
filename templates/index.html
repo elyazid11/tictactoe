@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>TicTacToe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #1a1a2e;
+      color: white;
+    }
+    h1 { font-size: 2rem; margin-bottom: 1rem; }
+    #status { font-size: 1.2rem; margin-bottom: 1rem; color: #e0e0e0; }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      gap: 8px;
+    }
+    .cell {
+      width: 120px;
+      height: 120px;
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 10px;
+      font-size: 3rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .cell:hover { background: #0f3460; }
+    .cell.x { color: #4fc3f7; }
+    .cell.o { color: #ef5350; }
+    #reset {
+      margin-top: 1.5rem;
+      padding: 10px 30px;
+      font-size: 1rem;
+      background: #0f3460;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #reset:hover { background: #4fc3f7; color: #1a1a2e; }
+  </style>
+</head>
+<body>
+  <h1>Tic-Tac-Toe</h1>
+  <div id="status">Tour de X</div>
+  <div id="board"></div>
+  <button id="reset" onclick="resetGame()">Nouvelle partie</button>
+
+  <script>
+    let board = Array(9).fill('');
+
+    function render() {
+      const el = document.getElementById('board');
+      el.innerHTML = '';
+      board.forEach((v, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell ' + (v ? v.toLowerCase() : '');
+        cell.textContent = v;
+        cell.onclick = () => play(i);
+        el.appendChild(cell);
+      });
+    }
+
+    async function play(i) {
+      const res = await fetch('/play', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({index: i})
+      });
+      const data = await res.json();
+      if (data.error) return;
+      board = data.board;
+      render();
+      if (data.winner) {
+        document.getElementById('status').textContent =
+          data.winner === 'Nul' ? 'Match nul !' : data.winner + ' gagne !';
+      } else {
+        document.getElementById('status').textContent = 'Tour de ' + data.current;
+      }
+    }
+
+    async function resetGame() {
+      const res = await fetch('/reset', {method: 'POST'});
+      const data = await res.json();
+      board = data.board;
+      render();
+      document.getElementById('status').textContent = 'Tour de X';
+    }
+
+    render();
+  </script>
+</body>
+</html>
