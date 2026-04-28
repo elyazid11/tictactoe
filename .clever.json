@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "app_id": "app_ce9f928a-c00d-48b5-9c6f-bbbca1494cd0",
+      "org_id": "user_6bbcccbd-607b-4ded-a4b9-74d7277fb45c",
+      "deploy_url": "https://push-n3-par-clevercloud-customers.services.clever-cloud.com/app_ce9f928a-c00d-48b5-9c6f-bbbca1494cd0.git",
+      "git_ssh_url": "git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_ce9f928a-c00d-48b5-9c6f-bbbca1494cd0.git",
+      "name": "tictactoe",
+      "alias": "tictactoe"
+    }
+  ]
+}

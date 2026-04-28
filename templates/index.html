@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>TicTacToe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #1a1a2e;
+      color: white;
+      min-height: 100vh;
+      margin: 0;
+      padding-top: 50px;
+    }
+    h1 { color: #e94560; margin-bottom: 10px; }
+    #status { font-size: 20px; margin: 15px 0; }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      gap: 8px;
+    }
+    .cell {
+      width: 120px;
+      height: 120px;
+      background: #16213e;
+      border: 2px solid #e94560;
+      border-radius: 10px;
+      font-size: 60px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .cell:hover { background: #0f3460; }
+    .cell.x { color: #4fc3f7; }
+    .cell.o { color: #e94560; }
+    .cell.win { background: #0f3460; border-color: gold; }
+    .scores {
+      display: flex;
+      gap: 30px;
+      margin: 20px 0;
+    }
+    .score-box {
+      text-align: center;
+      background: #16213e;
+      padding: 10px 25px;
+      border-radius: 10px;
+      border: 1px solid #e94560;
+    }
+    .score-box span { font-size: 28px; font-weight: bold; }
+    .x-color { color: #4fc3f7; }
+    .o-color { color: #e94560; }
+    button {
+      margin-top: 20px;
+      padding: 10px 30px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background: #c73652; }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+
+  <div class="scores">
+    <div class="score-box">
+      <div class="x-color">X</div>
+      <span class="x-color" id="sx">0</span>
+    </div>
+    <div class="score-box">
+      <div>Nuls</div>
+      <span id="sd">0</span>
+    </div>
+    <div class="score-box">
+      <div class="o-color">O</div>
+      <span class="o-color" id="so">0</span>
+    </div>
+  </div>
+
+  <div id="status">Tour de X</div>
+  <div id="board"></div>
+  <button onclick="reset()">Nouvelle partie</button>
+
+  <script>
+    let board = Array(9).fill('');
+    let current = 'X';
+    let gameOver = false;
+    let score = {X:0, O:0, D:0};
+
+    function render() {
+      const b = document.getElementById('board');
+      b.innerHTML = '';
+      board.forEach((v, i) => {
+        const c = document.createElement('div');
+        c.className = 'cell' + (v === 'X' ? ' x' : v === 'O' ? ' o' : '');
+        c.textContent = v;
+        c.onclick = () => play(i);
+        b.appendChild(c);
+      });
+    }
+
+    async function play(i) {
+      if (gameOver || board[i]) return;
+      board[i] = current;
+      render();
+
+      const res = await fetch('/play', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({board})
+      });
+      const data = await res.json();
+
+      if (data.result === current) {
+        document.getElementById('status').textContent = current + ' gagne !';
+        score[current]++;
+        gameOver = true;
+      } else if (data.result === 'nul') {
+        document.getElementById('status').textContent = 'Match nul !';
+        score.D++;
+        gameOver = true;
+      } else {
+        current = current === 'X' ? 'O' : 'X';
+        document.getElementById('status').textContent = 'Tour de ' + current;
+      }
+
+      document.getElementById('sx').textContent = score.X;
+      document.getElementById('so').textContent = score.O;
+      document.getElementById('sd').textContent = score.D;
+    }
+
+    function reset() {
+      board = Array(9).fill('');
+      current = 'X';
+      gameOver = false;
+      document.getElementById('status').textContent = 'Tour de X';
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
